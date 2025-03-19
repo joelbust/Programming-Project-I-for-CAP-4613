@@ -1,48 +1,82 @@
 import torch
-import torch.optim as optim
-from models import FullyConnectedNN
+from models import FullyConnectedNN, CNN, LocallyConnectedNN
 from dataset import get_dataloaders
-from utils import initialize_weights, plot_losses
+from training import train_model
+from utils import plot_losses
 
-def train_model(model, train_loader, lr, momentum=0.9, epochs=5, weight_init="balanced_variance"):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model.to(device)
-    initialize_weights(model, weight_init)
-    
-    optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum)
-    criterion = torch.nn.CrossEntropyLoss()
-    
-    loss_history = []
-    
-    for epoch in range(epochs):
-        model.train()
-        total_loss = 0
-        for inputs, targets in train_loader:
-            inputs, targets = inputs.to(device), targets.to(device)
-            optimizer.zero_grad()
-            outputs = model(inputs.view(inputs.size(0), -1))  
-            loss = criterion(outputs, targets)
-            loss.backward()
-            optimizer.step()
-            total_loss += loss.item()
-        
-        avg_loss = total_loss / len(train_loader)
-        loss_history.append(avg_loss)
-        print(f"Epoch {epoch+1}, LR {lr}, Momentum {momentum}, Loss: {avg_loss:.4f}")
+# Load dataset
+train_loader, _ = get_dataloaders()
 
-    return loss_history
+# Define models
+models = {
+    "FullyConnectedNN": FullyConnectedNN(),
+    "CNN": CNN(),
+    "LocallyConnectedNN": LocallyConnectedNN()
+}
 
-if __name__ == "__main__":
-    train_loader, _ = get_dataloaders()
+###  (1) Parameter Initialization Experiment
+losses_weight_init = {}
 
-    # Test Different Initialization Strategies
-    fc_balanced_variance = FullyConnectedNN()
-    loss_balanced_variance = train_model(fc_balanced_variance, train_loader, lr=0.01, weight_init="balanced_variance")
+for model_name, model in models.items():
+    print(f"\n Training {model_name} with different weight initializations...")
+    losses_weight_init[model_name] = {
+        "Random": train_model(model, train_loader, lr=0.01, weight_init="random_baseline"),
+        "Balanced Variance": train_model(model, train_loader, lr=0.01, weight_init="balanced_variance"),
+        "Activation Specific": train_model(model, train_loader, lr=0.01, weight_init="activation_specific")
+    }
 
-    fc_activation_specific = FullyConnectedNN()
-    loss_activation_specific = train_model(fc_activation_specific, train_loader, lr=0.01, weight_init="activation_specific")
+    # Save plots with unique filenames
+    plot_losses(
+        list(losses_weight_init[model_name].values()),
+        list(losses_weight_init[model_name].keys()),
+        f"Weight_Initialization_{model_name}"
+    )
 
-    fc_random_baseline = FullyConnectedNN()
-    loss_random_baseline = train_model(fc_random_baseline, train_loader, lr=0.01, weight_init="random_baseline")
+###  (2) Learning Rate Experiment
+losses_learning_rate = {}
 
-    plot_losses([loss_balanced_variance, loss_activation_specific, loss_random_baseline], ["balanced_variance", "activation_specific", "random_baseline"], "Impact of Weight Initialization")
+for model_name, model in models.items():
+    print(f"\n Training {model_name} with different learning rates...")
+    losses_learning_rate[model_name] = {
+        "Low LR (0.0001)": train_model(model, train_loader, lr=0.0001),
+        "Optimal LR (0.01)": train_model(model, train_loader, lr=0.01),
+        "High LR (1)": train_model(model, train_loader, lr=1)
+    }
+
+    #  Save plots with unique filenames
+    plot_losses(
+        list(losses_learning_rate[model_name].values()),
+        list(losses_learning_rate[model_name].keys()),
+        f"Learning_Rate_{model_name}"
+    )
+
+###  (3) Batch Size Experiment (CNN only)
+print("\n Training CNN with different batch sizes...")
+small_batch_loader, _ = get_dataloaders(batch_size=16)
+large_batch_loader, _ = get_dataloaders(batch_size=256)
+
+cnn_model = CNN()
+loss_small_batch = train_model(cnn_model, small_batch_loader, lr=0.01)
+loss_large_batch = train_model(cnn_model, large_batch_loader, lr=0.01)
+
+#  Save plots with unique filenames
+plot_losses(
+    [loss_small_batch, loss_large_batch],
+    ["Small Batch (16)", "Large Batch (256)"],
+    "Batch_Size_CNN"
+)
+
+###  (4) Momentum Experiment (CNN only)
+print("\n Training CNN with different momentum values...")
+loss_momentum_05 = train_model(CNN(), train_loader, lr=0.01, momentum=0.5)
+loss_momentum_09 = train_model(CNN(), train_loader, lr=0.01, momentum=0.9)
+loss_momentum_099 = train_model(CNN(), train_loader, lr=0.01, momentum=0.99)
+
+#  Save plots with unique filenames
+plot_losses(
+    [loss_momentum_05, loss_momentum_09, loss_momentum_099],
+    ["Momentum 0.5", "Momentum 0.9", "Momentum 0.99"],
+    "Momentum_CNN"
+)
+
+print(" All experiments for Task 2 completed. Results saved.")
