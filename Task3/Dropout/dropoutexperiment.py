@@ -61,16 +61,16 @@ if __name__ == "__main__":
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 
     # Effective Dropout Test
-    print("\nTraining with Dropout = 0.5 (Effective)")
-    model_effective = FullyConnectedNNWithDropout(dropout_prob=0.5)
+    print("\nTraining with Dropout = 0.4 (Effective)")
+    model_effective = FullyConnectedNNWithDropout(dropout_prob=0.4)
     loss_effective = train_model(model_effective, train_loader)
 
     # Ineffective Dropout Test
-    print("\nTraining with Dropout = 0.8 (Ineffective)")
-    model_ineffective = FullyConnectedNNWithDropout(dropout_prob=0.8)
+    print("\nTraining with Dropout = 0.9 (Ineffective)")
+    model_ineffective = FullyConnectedNNWithDropout(dropout_prob=0.9)
     loss_ineffective = train_model(model_ineffective, train_loader)
 
     # Actually using the plot
     plot_losses([loss_effective, loss_ineffective],
-                ["Dropout 0.5 (Effective)", "Dropout 0.8 (Ineffective)"],
+                ["Dropout 0.4 (Effective)", "Dropout 0.9 (Ineffective)"],
                 "Dropout Effect on Fully Connected NN")
