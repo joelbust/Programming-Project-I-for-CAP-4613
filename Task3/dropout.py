@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
+# all essentially the same as the one in task 2 but with dropout now included
 class FullyConnectedNNWithDropout(nn.Module):
     def __init__(self, input_size=256, hidden_size1=128, hidden_size2=128, hidden_size3=64, output_size=10, dropout_prob=0.5):
         super(FullyConnectedNNWithDropout, self).__init__()
