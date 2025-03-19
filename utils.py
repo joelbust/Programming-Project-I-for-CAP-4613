@@ -45,10 +45,10 @@ def plot_losses(loss_list, labels, title):
     plt.title(title)
     plt.legend()
 
-    # ✅ Generate a unique filename based on the experiment type
+    # Generate a unique filename based on the experiment type
     filename = title.replace(" ", "_").lower() + ".png"
     filepath = f"results/{filename}"
 
     plt.savefig(filepath)
-    print(f"✅ Plot saved as {filepath}")
+    print(f"Plot saved as {filepath}")
     plt.close()
