@@ -32,18 +32,22 @@ for model_name, model in models.items():
         f"Weight_Initialization_{model_name}"
     )
 
-###  (2) Learning Rate Experiment
+### (2) Learning Rate Experiment
 losses_learning_rate = {}
 
 for model_name, model in models.items():
     print(f"\n Training {model_name} with different learning rates...")
+
+    # Set weight initialization method
+    weight_init_method = "random_baseline" if model_name == "LocallyConnectedNN" else "balanced_variance"
+
     losses_learning_rate[model_name] = {
-        "Low LR (0.0001)": train_model(model, train_loader, lr=0.0001),
-        "Optimal LR (0.01)": train_model(model, train_loader, lr=0.01),
-        "High LR (1)": train_model(model, train_loader, lr=1)
+        "Low LR (0.0001)": train_model(model, train_loader, lr=0.0001, weight_init=weight_init_method),
+        "Optimal LR (0.01)": train_model(model, train_loader, lr=0.01, weight_init=weight_init_method),
+        "High LR (1)": train_model(model, train_loader, lr=1, weight_init=weight_init_method)
     }
 
-    #  Save plots with unique filenames
+    # Save plots with unique filenames
     plot_losses(
         list(losses_learning_rate[model_name].values()),
         list(losses_learning_rate[model_name].keys()),
