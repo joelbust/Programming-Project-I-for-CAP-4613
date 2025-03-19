@@ -1,11 +1,10 @@
-# dropout_experiment.py
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
 import matplotlib.pyplot as plt
-from dropout_model import FullyConnectedNNWithDropout
+from dropout import FullyConnectedNNWithDropout
 
 class DigitDataset(Dataset):
     def __init__(self, file_path):
@@ -19,6 +18,8 @@ class DigitDataset(Dataset):
     def __getitem__(self, idx):
         return self.features[idx], self.labels[idx]
 
+# was having issues with imports so put this with 
+# the experiement file to ensure it worked
 def train_model(model, dataloader, lr=0.01, num_epochs=5):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -42,7 +43,7 @@ def train_model(model, dataloader, lr=0.01, num_epochs=5):
         loss_history.append(avg_loss)
     return loss_history
 
-# Plotting
+# my graph
 def plot_losses(losses, labels, title):
     for loss, label in zip(losses, labels):
         plt.plot(loss, label=label)
@@ -53,22 +54,23 @@ def plot_losses(losses, labels, title):
     plt.savefig(f"{title.replace(' ', '_')}.png")
     plt.show()
 
+# the actual main
 if __name__ == "__main__":
-    # Load dataset (adjust paths as needed)
+    # Load data
     train_dataset = DigitDataset("zip_train.txt")
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 
-    # Effective Dropout
+    # Effective Dropout Test
     print("\nTraining with Dropout = 0.5 (Effective)")
     model_effective = FullyConnectedNNWithDropout(dropout_prob=0.5)
     loss_effective = train_model(model_effective, train_loader)
 
-    # Ineffective Dropout
+    # Ineffective Dropout Test
     print("\nTraining with Dropout = 0.8 (Ineffective)")
     model_ineffective = FullyConnectedNNWithDropout(dropout_prob=0.8)
     loss_ineffective = train_model(model_ineffective, train_loader)
 
-    # Plot
+    # Actually using the plot
     plot_losses([loss_effective, loss_ineffective],
                 ["Dropout 0.5 (Effective)", "Dropout 0.8 (Ineffective)"],
                 "Dropout Effect on Fully Connected NN")
