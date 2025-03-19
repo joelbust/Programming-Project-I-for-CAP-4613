@@ -13,7 +13,7 @@ class DigitDataset(Dataset):
         return len(self.labels)
 
     def __getitem__(self, idx):
-        return self.features[idx], self.labels[idx]  # ✅ Return only (features, labels)
+        return self.features[idx], self.labels[idx]  # Return only (features, labels)
 
 def get_dataloaders(batch_size=64):
     train_dataset = DigitDataset("data/zip_train.txt")
