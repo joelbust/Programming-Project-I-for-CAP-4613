@@ -136,12 +136,12 @@ class LocallyConnectedNN(nn.Module):
         
     def forward(self, x):
         # Reshape input to 16 x 16 with 1 channel
-        # Apply the activation functions Relu, tanh, sigmoid
+        # Apply the activation functions ReLU and Tanh
         x = x.view(-1, 1, 16, 16)  
         x = F.relu(self.local1(x))  
         x = torch.tanh(self.local2(x))     
         x = F.relu(self.local3(x))         
-        # Flatten and apply fully connected layer
+        # Flatten and apply Fully connected layer
         x = x.reshape(-1, 4 * 4 * 64)     
         x = self.fc(x)                     
         return x
