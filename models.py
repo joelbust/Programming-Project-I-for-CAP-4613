@@ -50,7 +50,7 @@ class CNN(nn.Module):
         # Apply max pooling
         x = self.pool(x)  
         
-        # Apply Global Average Pooling (GAP)
+        # Apply Global Average Pooling 
         # Flatten tensor for Fully connected layers
         x = self.gap(x)  
         x = x.view(x.size(0), -1)  
