@@ -15,11 +15,11 @@ class FullyConnectedNN(nn.Module):
         
     def forward(self, x):
         # Flatten the input to have 256 features
-        # Apply Relu, tanh, sigmoid activation functions 
+        # Apply ReLU and tanh activation functions 
         x = x.view(-1, 256)  
         x = F.relu(self.fc1(x))  
         x = torch.tanh(self.fc2(x))  
-        x = torch.sigmoid(self.fc3(x))  
+        x = F.relu(self.fc3(x))  
         x = self.fc4(x)  
         return x
 
@@ -138,7 +138,7 @@ class LocallyConnectedNN(nn.Module):
         # Reshape input to 16 x 16 with 1 channel
         # Apply the activation functions Relu, tanh, sigmoid
         x = x.view(-1, 1, 16, 16)  
-        x = torch.sigmoid(self.local1(x))  
+        x = F.relu(self.local1(x))  
         x = torch.tanh(self.local2(x))     
         x = F.relu(self.local3(x))         
         # Flatten and apply fully connected layer
